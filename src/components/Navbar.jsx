@@ -11,8 +11,10 @@ export default function Navbar() {
   const auth = useAuth()
   const { cartCount } = useCart()
 
-  function handleSignOut() {
-    // Redirects to Cognito's logout endpoint — clears session on AWS side
+  async function handleSignOut() {
+    // 1. Clear the local session (removes token from sessionStorage)
+    await auth.removeUser()
+    // 2. Redirect to Cognito logout to clear the server-side session too
     window.location.href =
       `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(LOGOUT_URI)}`
   }
