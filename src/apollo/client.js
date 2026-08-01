@@ -1,7 +1,9 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 
 const httpLink = createHttpLink({
-  uri: '/graphql',      // proxied via Vite to http://localhost:5000/graphql
+  // In dev: Vite proxy forwards /graphql → localhost:5000
+  // In production: VITE_GRAPHQL_URI env var points to the deployed backend
+  uri: import.meta.env.VITE_GRAPHQL_URI || '/graphql',
   credentials: 'include', // send HTTP-only cookie with every request
 });
 
