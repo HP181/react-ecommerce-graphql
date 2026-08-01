@@ -28,7 +28,7 @@ export default function AdminPage() {
 
       {/* Tab switcher */}
       <div className="flex gap-3 mb-6">
-        {['products', 'orders', 'users'].map(t => (
+        {['products', 'orders'].map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -46,7 +46,6 @@ export default function AdminPage() {
         />
       )}
       {tab === 'orders' && <OrdersTab />}
-      {tab === 'users'  && <UsersTab />}
 
       {showForm && (
         <Modal
@@ -160,30 +159,3 @@ function OrdersTab() {
   )
 }
 
-// ── Users tab ─────────────────────────────────────────────────────────────────
-function UsersTab() {
-  const { data, loading } = useQuery(USERS)
-
-  if (loading) return <LoadingSpinner />
-
-  return (
-    <table className="w-full border-collapse text-sm">
-      <thead>
-        <tr className="bg-gray-100 text-left">
-          <th className="p-2 border">Name</th>
-          <th className="p-2 border">Email</th>
-          <th className="p-2 border">Role</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data?.users?.map(u => (
-          <tr key={u.id} className="hover:bg-gray-50">
-            <td className="p-2 border">{u.name}</td>
-            <td className="p-2 border">{u.email}</td>
-            <td className="p-2 border capitalize">{u.role}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
-}

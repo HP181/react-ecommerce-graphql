@@ -23,11 +23,11 @@ function PrivateRoute({ children }) {
 export default function App() {
   const auth = useAuth()
 
-  // Whenever the Cognito auth state changes, push the access token into Apollo
-  // This ensures every GraphQL request after login includes the Bearer token
+  // Send the ID token (not access token) — Cognito's ID token contains `email`
+  // which the backend needs for the isAdmin() check. Access token omits email.
   useEffect(() => {
-    setAccessToken(auth.user?.access_token || null)
-  }, [auth.user?.access_token])
+    setAccessToken(auth.user?.id_token || null)
+  }, [auth.user?.id_token])
 
   if (auth.isLoading) return <div className="p-10 text-center">Loading...</div>
   if (auth.error)     return <div className="p-10 text-center text-red-500">Auth error: {auth.error.message}</div>

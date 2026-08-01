@@ -38,7 +38,6 @@ export default function Navbar() {
           <>
             <span className="text-sm opacity-80">{auth.user?.profile.email}</span>
             <Link to="/orders">My Orders</Link>
-            {console.log('Admin email from env:', ADMIN_EMAIL)}
             {/* Only show Admin link if the logged-in email is the admin */}
             {auth.user?.profile.email === ADMIN_EMAIL && (
               <Link to="/admin">Admin</Link>
