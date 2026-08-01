@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import { AuthProvider as CognitoProvider } from 'react-oidc-context'
 import client from './apollo/client'
-import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import App from './App'
 import "./index.css"
@@ -23,11 +22,9 @@ createRoot(document.getElementById('root')).render(
     <CognitoProvider {...cognitoAuthConfig}>
       <ApolloProvider client={client}>
         <BrowserRouter>
-          <AuthProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
         </BrowserRouter>
       </ApolloProvider>
     </CognitoProvider>
