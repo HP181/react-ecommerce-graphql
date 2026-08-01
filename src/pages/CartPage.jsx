@@ -2,22 +2,18 @@ import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
 import { CREATE_ORDER } from '../graphql/mutations'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, cartTotal } = useCart()
-  const { user } = useAuth()
   const navigate = useNavigate()
 
-  // ShippingAddressInput requires: address, city, postalCode, country
   const [address, setAddress] = useState({ address: '', city: '', postalCode: '', country: '' })
 
   const [createOrder] = useMutation(CREATE_ORDER)
 
   async function handleCheckout(e) {
     e.preventDefault()
-    if (!user) return navigate('/login')
 
     // OrderItemInput only needs { product: ID!, quantity: Int! }
     // The backend looks up price/name from the product in the database

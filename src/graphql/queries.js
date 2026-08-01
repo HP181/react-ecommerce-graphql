@@ -92,10 +92,7 @@ export const ORDERS = gql`
       status
       isPaid
       createdAt
-      user {
-        name
-        email
-      }
+      userEmail
       items {
         name
         quantity

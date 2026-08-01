@@ -1,49 +1,45 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CartPage from './pages/CartPage'
 import OrdersPage from './pages/OrdersPage'
 import AdminPage from './pages/AdminPage'
 
+// Wraps a route — redirects to Cognito login if not authenticated
+function PrivateRoute({ children }) {
+  const auth = useAuth()
+  if (auth.isLoading) return <div className="p-10 text-center">Loading...</div>
+  if (!auth.isAuthenticated) {
+    // Trigger Cognito login then come back
+    auth.signinRedirect()
+    return null
+  }
+  return children
+}
+
 export default function App() {
   const auth = useAuth()
 
   if (auth.isLoading) return <div className="p-10 text-center">Loading...</div>
+  if (auth.error)     return <div className="p-10 text-center text-red-500">Auth error: {auth.error.message}</div>
 
-  if (auth.error) return <div className="p-10 text-center text-red-500">Auth error: {auth.error.message}</div>
-
-  // Not logged in → show sign-in screen instead of the app
-  if (!auth.isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <h1 className="text-2xl font-bold">ShopQL</h1>
-        <p className="text-gray-500">Please sign in to continue</p>
-        <button
-          onClick={() => auth.signinRedirect()}
-          className="bg-blue-600 text-white px-6 py-2 rounded"
-        >
-          Sign in
-        </button>
-      </div>
-    )
-  }
-
-  // Logged in → show full app
   return (
     <>
       <Navbar />
       <Routes>
+        {/* Public — anyone can browse */}
         <Route path="/"            element={<HomePage />} />
-        <Route path="/login"       element={<LoginPage />} />
-        <Route path="/register"    element={<RegisterPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
-        <Route path="/cart"        element={<CartPage />} />
-        <Route path="/orders"      element={<OrdersPage />} />
-        <Route path="/admin"       element={<AdminPage />} />
+
+        {/* Private — must be logged in */}
+        <Route path="/cart"   element={<PrivateRoute><CartPage /></PrivateRoute>} />
+        <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
+        <Route path="/admin"  element={<PrivateRoute><AdminPage /></PrivateRoute>} />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>
   )

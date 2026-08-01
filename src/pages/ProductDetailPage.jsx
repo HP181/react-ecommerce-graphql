@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@apollo/client'
 import { PRODUCT } from '../graphql/queries'
 import { ADD_REVIEW } from '../graphql/mutations'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from 'react-oidc-context'
 import { useCart } from '../context/CartContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function ProductDetailPage() {
   const { id } = useParams()  // get product id from URL (/product/:id)
-  const { user } = useAuth()
+  const auth = useAuth()
   const { addToCart } = useCart()
 
   const [qty, setQty]         = useState(1)
@@ -81,7 +81,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Review form — only visible when logged in */}
-      {user && (
+      {auth.isAuthenticated && (
         <form onSubmit={handleReview} className="mt-6 flex flex-col gap-3 max-w-md">
           <h3 className="font-semibold">Write a Review</h3>
           <select

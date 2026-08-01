@@ -2,21 +2,22 @@ import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
 import { PRODUCTS, ORDERS, USERS } from '../graphql/queries'
 import { DELETE_PRODUCT, UPDATE_ORDER_STATUS, DELETE_ORDER } from '../graphql/mutations'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import Modal from '../components/Modal'
 import ProductForm from '../components/ProductForm'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function AdminPage() {
-  const { user, loading: authLoading } = useAuth()
+  const auth = useAuth()
   const navigate = useNavigate()
-  const [tab, setTab]       = useState('products')
+  const [tab, setTab]           = useState('products')
   const [showForm, setShowForm] = useState(false)
-  const [editing, setEditing]   = useState(null)  // the product being edited
+  const [editing, setEditing]   = useState(null)
 
-  // Redirect non-admins — wait for auth check first
-  if (!authLoading && (!user || user.role !== 'admin')) {
+  // Only users whose email matches VITE_ADMIN_EMAIL can access admin
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL
+  if (auth.isAuthenticated && auth.user?.profile.email !== adminEmail) {
     navigate('/')
     return null
   }
@@ -132,7 +133,7 @@ function OrdersTab() {
         {data?.orders?.map(o => (
           <tr key={o.id} className="hover:bg-gray-50">
             <td className="p-2 border">#{o.id.slice(-6)}</td>
-            <td className="p-2 border">{o.user.email}</td>
+            <td className="p-2 border">{o.userEmail}</td>
             {/* `totalAmount` matches backend field */}
             <td className="p-2 border">${o.totalAmount.toFixed(2)}</td>
             <td className="p-2 border">
