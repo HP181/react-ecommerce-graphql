@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
-import { PRODUCTS, ORDERS } from '../graphql/queries'
+import { PRODUCTS, ORDERS, USERS } from '../graphql/queries'
 import { DELETE_PRODUCT, UPDATE_ORDER_STATUS, DELETE_ORDER } from '../graphql/mutations'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
@@ -28,7 +28,7 @@ export default function AdminPage() {
 
       {/* Tab switcher */}
       <div className="flex gap-3 mb-6">
-        {['products', 'orders'].map(t => (
+        {['products', 'orders', 'users'].map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -46,6 +46,7 @@ export default function AdminPage() {
         />
       )}
       {tab === 'orders' && <OrdersTab />}
+      {tab === 'users'  && <UsersTab />}
 
       {showForm && (
         <Modal
@@ -104,6 +105,32 @@ function ProductsTab({ onNew, onEdit }) {
         </tbody>
       </table>
     </>
+  )
+}
+
+// ── Users tab — lists everyone who has logged in via Cognito ──────────────────
+function UsersTab() {
+  const { data, loading } = useQuery(USERS)
+  if (loading) return <LoadingSpinner />
+  return (
+    <table className="w-full border-collapse text-sm">
+      <thead>
+        <tr className="bg-gray-100 text-left">
+          <th className="p-2 border">Name</th>
+          <th className="p-2 border">Email</th>
+          <th className="p-2 border">Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data?.users?.map(u => (
+          <tr key={u.id} className="hover:bg-gray-50">
+            <td className="p-2 border">{u.name || '—'}</td>
+            <td className="p-2 border">{u.email}</td>
+            <td className="p-2 border capitalize">{u.role}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
