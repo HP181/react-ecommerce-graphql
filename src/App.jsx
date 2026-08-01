@@ -32,9 +32,9 @@ export default function App() {
         {/* Public — anyone can browse */}
         <Route path="/"            element={<HomePage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/cart"        element={<CartPage />} />
 
         {/* Private — must be logged in */}
-        <Route path="/cart"   element={<PrivateRoute><CartPage /></PrivateRoute>} />
         <Route path="/orders" element={<PrivateRoute><OrdersPage /></PrivateRoute>} />
         <Route path="/admin"  element={<PrivateRoute><AdminPage /></PrivateRoute>} />
 

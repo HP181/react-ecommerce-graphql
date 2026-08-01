@@ -1,29 +1,22 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import { useCart } from '../context/CartContext'
 import { CREATE_ORDER } from '../graphql/mutations'
 
 export default function CartPage() {
   const { cart, removeFromCart, clearCart, cartTotal } = useCart()
+  const auth = useAuth()
   const navigate = useNavigate()
 
   const [address, setAddress] = useState({ address: '', city: '', postalCode: '', country: '' })
-
   const [createOrder] = useMutation(CREATE_ORDER)
 
   async function handleCheckout(e) {
     e.preventDefault()
-
-    // OrderItemInput only needs { product: ID!, quantity: Int! }
-    // The backend looks up price/name from the product in the database
-    const items = cart.map(i => ({
-      product: i.id,
-      quantity: i.qty,
-    }))
-
+    const items = cart.map(i => ({ product: i.id, quantity: i.qty }))
     await createOrder({ variables: { items, shippingAddress: address } })
-
     clearCart()
     navigate('/orders')
   }
@@ -36,6 +29,7 @@ export default function CartPage() {
     <div className="p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Cart</h1>
 
+      {/* Cart items — visible to everyone */}
       {cart.map(item => (
         <div key={item.id} className="flex items-center gap-4 border-b py-3">
           <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
@@ -52,30 +46,41 @@ export default function CartPage() {
 
       <p className="text-right text-xl font-bold mt-4">Total: ${cartTotal.toFixed(2)}</p>
 
-      <form onSubmit={handleCheckout} className="mt-6 flex flex-col gap-3">
-        <h2 className="font-semibold text-lg">Shipping Address</h2>
-
-        {/* Match ShippingAddressInput field names exactly */}
-        {[
-          { name: 'address',    placeholder: 'Street Address' },
-          { name: 'city',       placeholder: 'City' },
-          { name: 'postalCode', placeholder: 'Postal Code' },
-          { name: 'country',    placeholder: 'Country' },
-        ].map(f => (
-          <input
-            key={f.name}
-            placeholder={f.placeholder}
-            value={address[f.name]}
-            onChange={e => setAddress(p => ({ ...p, [f.name]: e.target.value }))}
-            required
-            className="border rounded px-3 py-2"
-          />
-        ))}
-
-        <button type="submit" className="bg-blue-600 text-white py-2 rounded mt-2">
-          Place Order
-        </button>
-      </form>
+      {/* Checkout — blocked if not logged in */}
+      {auth.isAuthenticated ? (
+        <form onSubmit={handleCheckout} className="mt-6 flex flex-col gap-3">
+          <h2 className="font-semibold text-lg">Shipping Address</h2>
+          {[
+            { name: 'address',    placeholder: 'Street Address' },
+            { name: 'city',       placeholder: 'City' },
+            { name: 'postalCode', placeholder: 'Postal Code' },
+            { name: 'country',    placeholder: 'Country' },
+          ].map(f => (
+            <input
+              key={f.name}
+              placeholder={f.placeholder}
+              value={address[f.name]}
+              onChange={e => setAddress(p => ({ ...p, [f.name]: e.target.value }))}
+              required
+              className="border rounded px-3 py-2"
+            />
+          ))}
+          <button type="submit" className="bg-blue-600 text-white py-2 rounded mt-2">
+            Place Order
+          </button>
+        </form>
+      ) : (
+        /* Not logged in — show prompt instead of checkout form */
+        <div className="mt-6 p-4 border rounded-lg text-center bg-gray-50">
+          <p className="text-gray-600 mb-3">Please sign in to place your order</p>
+          <button
+            onClick={() => auth.signinRedirect()}
+            className="bg-blue-600 text-white px-6 py-2 rounded"
+          >
+            Sign in to Checkout
+          </button>
+        </div>
+      )}
     </div>
   )
 }
