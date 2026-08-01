@@ -1,0 +1,67 @@
+import { useState } from 'react'
+import { useMutation } from '@apollo/client'
+import { useNavigate, Link } from 'react-router-dom'
+import { REGISTER } from '../graphql/mutations'
+import { useAuth } from '../context/AuthContext'
+
+export default function RegisterPage() {
+  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [error, setError] = useState('')
+  const { refetch } = useAuth()
+  const navigate = useNavigate()
+
+  const [register] = useMutation(REGISTER)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+    try {
+      await register({ variables: form })
+      await refetch()
+      navigate('/')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  return (
+    <div className="max-w-sm mx-auto mt-20 p-6 border rounded-lg shadow">
+      <h1 className="text-2xl font-bold mb-4">Register</h1>
+
+      {error && <p className="text-red-500 mb-3">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+          required
+          className="border rounded px-3 py-2"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+          required
+          className="border rounded px-3 py-2"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+          required
+          className="border rounded px-3 py-2"
+        />
+        <button type="submit" className="bg-blue-600 text-white py-2 rounded">
+          Register
+        </button>
+      </form>
+
+      <p className="mt-4 text-center text-sm">
+        Have an account? <Link to="/login" className="text-blue-600">Login</Link>
+      </p>
+    </div>
+  )
+}
