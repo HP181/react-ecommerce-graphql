@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/graphql': {
-        target: 'http://localhost:5000',
+        target: 'https://express-ecommerce-graphql.vercel.app',
         changeOrigin: true,
       },
     },
