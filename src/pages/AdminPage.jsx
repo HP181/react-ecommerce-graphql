@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client'
-import { PRODUCTS, ORDERS, USERS } from '../graphql/queries'
+import { PRODUCTS, ORDERS } from '../graphql/queries'
 import { DELETE_PRODUCT, UPDATE_ORDER_STATUS, DELETE_ORDER } from '../graphql/mutations'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'

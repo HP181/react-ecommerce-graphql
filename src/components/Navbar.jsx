@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext'
 const COGNITO_DOMAIN = import.meta.env.VITE_COGNITO_DOMAIN
 const CLIENT_ID      = import.meta.env.VITE_COGNITO_CLIENT_ID
 const LOGOUT_URI     = import.meta.env.VITE_COGNITO_LOGOUT_URI
+const ADMIN_EMAIL    = import.meta.env.VITE_ADMIN_EMAIL
 
 export default function Navbar() {
   const auth = useAuth()
@@ -37,6 +38,10 @@ export default function Navbar() {
           <>
             <span className="text-sm opacity-80">{auth.user?.profile.email}</span>
             <Link to="/orders">My Orders</Link>
+            {/* Only show Admin link if the logged-in email is the admin */}
+            {auth.user?.profile.email === ADMIN_EMAIL && (
+              <Link to="/admin">Admin</Link>
+            )}
             <button
               onClick={handleSignOut}
               className="bg-white text-blue-600 px-3 py-1 rounded"
