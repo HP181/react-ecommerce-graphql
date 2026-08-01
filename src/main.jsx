@@ -2,28 +2,34 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
+import { AuthProvider as CognitoProvider } from 'react-oidc-context'
 import client from './apollo/client'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import App from './App'
-// import './index.css'
-import "./index.css";
+import "./index.css"
 
-// Wrap everything so all components can access:
-//   ApolloProvider → GraphQL client (queries/mutations)
-//   BrowserRouter  → page routing
-//   AuthProvider   → logged-in user state
-//   CartProvider   → shopping cart state
+// All values come from .env file (VITE_ prefix makes them available in the browser)
+const cognitoAuthConfig = {
+  authority:     import.meta.env.VITE_COGNITO_AUTHORITY,
+  client_id:     import.meta.env.VITE_COGNITO_CLIENT_ID,
+  redirect_uri:  import.meta.env.VITE_COGNITO_REDIRECT_URI,
+  response_type: "code",
+  scope:         import.meta.env.VITE_COGNITO_SCOPE,
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <AuthProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ApolloProvider>
+    <CognitoProvider {...cognitoAuthConfig}>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <AuthProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ApolloProvider>
+    </CognitoProvider>
   </StrictMode>
 )

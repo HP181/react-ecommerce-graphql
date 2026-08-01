@@ -12,8 +12,10 @@
     "@apollo/client": "^3.11.8",
     "@tailwindcss/vite": "^4.3.3",
     "graphql": "^16.9.0",
+    "oidc-client-ts": "^3.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-oidc-context": "^3.3.1",
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {

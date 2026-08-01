@@ -1,24 +1,27 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { Link } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import { useCart } from '../context/CartContext'
 
-export default function Navbar() {
-  const { user, logout } = useAuth()
-  const { cartCount } = useCart()
-  const navigate = useNavigate()
+// Read from .env
+const COGNITO_DOMAIN = import.meta.env.VITE_COGNITO_DOMAIN
+const CLIENT_ID      = import.meta.env.VITE_COGNITO_CLIENT_ID
+const LOGOUT_URI     = import.meta.env.VITE_COGNITO_LOGOUT_URI
 
-  async function handleLogout() {
-    await logout()
-    navigate('/')
+export default function Navbar() {
+  const auth = useAuth()
+  const { cartCount } = useCart()
+
+  function handleSignOut() {
+    // Redirects to Cognito's logout endpoint — clears session on AWS side
+    window.location.href =
+      `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(LOGOUT_URI)}`
   }
 
   return (
     <nav className="bg-blue-600 text-white px-6 py-3 flex justify-between items-center">
-      {/* Site logo / home link */}
       <Link to="/" className="text-xl font-bold">ShopQL</Link>
 
       <div className="flex items-center gap-4">
-        {/* Cart icon with item count badge */}
         <Link to="/cart" className="relative">
           Cart
           {cartCount > 0 && (
@@ -28,19 +31,26 @@ export default function Navbar() {
           )}
         </Link>
 
-        {user ? (
+        {auth.isAuthenticated ? (
           <>
-            {/* Only show Admin link if user is an admin */}
-            {user.role === 'admin' && <Link to="/admin">Admin</Link>}
+            <span className="text-sm opacity-80">{auth.user?.profile.email}</span>
             <Link to="/orders">My Orders</Link>
-            <button onClick={handleLogout} className="bg-white text-blue-600 px-3 py-1 rounded">
+            <button
+              onClick={handleSignOut}
+              className="bg-white text-blue-600 px-3 py-1 rounded"
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register" className="bg-white text-blue-600 px-3 py-1 rounded">Register</Link>
+            <button onClick={() => auth.signinRedirect()}>Login</button>
+            <button
+              onClick={() => auth.signinRedirect()}
+              className="bg-white text-blue-600 px-3 py-1 rounded"
+            >
+              Register
+            </button>
           </>
         )}
       </div>
